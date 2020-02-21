@@ -25,11 +25,21 @@
                 <ul>
                     <li v-for="todo in todos">
                         <label class="checkbox">
-                            <input type="checkbox" class="checkbox-input" :checked="todo.completed">
+                            <input type="checkbox" class="checkbox-input" :checked="todo.completed" @change="e => updateCheck(e, todo)">
                             <span class="checkbox-label">{{todo.title}}</span>
                         </label>
                     </li>
                 </ul>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-title">
+                <p>New To Do</p>
+            </div>
+            <div class="card-body">
+                <Loader v-if="adding" />
+                <input type="text" class="input" v-model="newTodo" placeholder="Type something...">
+                <button type="button" class="btn-primary btn-add" @click="addTodo" :disabled="!newTodo">Add To do</button>
             </div>
         </div>
     </div>
@@ -43,7 +53,9 @@
             return {
                 user: {},
                 todos: [],
-                loading: true
+                loading: true,
+                newTodo: '',
+                adding: false
             }
         },
         async mounted() {
@@ -53,6 +65,37 @@
             this.user = reqUser.data;
             this.todos = reqTod.data;
             this.loading = false;
+        },
+        methods: {
+            async updateCheck(e, todo) {
+                const newTodo = {
+                    ...todo,
+                    completed: e.target.checked
+                };
+                try {
+                    const req = await this.$axios.put(`${this.API}/todos/${todo.id}`, newTodo);
+                    alert(`Update To Do id: ${todo.id} successfully`);
+                } catch (e) {
+                    alert('Error in update data');
+                }
+            },
+            async addTodo(e) {
+                e.preventDefault();
+                this.adding = true;
+                const newTodo = {
+                  userId: this.user.id,
+                  title: this.newTodo,
+                  completed: false
+                };
+                try {
+                    const req = await this.$axios.post(`${this.API}/todos`, newTodo);
+                    this.adding = false;
+                    this.todos.push({...newTodo, id: req.data.id});
+                    alert('To do added successfully');
+                } catch (error) {
+                    alert('Error in create data');
+                }
+            }
         }
     }
 </script>
@@ -145,6 +188,22 @@
             &:after {
                 border-color: #ffffff;
             }
+        }
+    }
+    .input {
+        background: #F5F6FA;
+        border: none;
+        padding: 10px 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.0212249);
+        &::placeholder {
+            color: rgba(0, 0, 0, 0.29);
+            opacity: 1;
+        }
+    }
+    .btn-add {
+        margin-top: 15px;
+        &[disabled] {
+            background: #F5F6FA;
         }
     }
 </style>

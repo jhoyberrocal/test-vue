@@ -6,6 +6,7 @@ import router from './router';
 Vue.prototype.API = 'https://jsonplaceholder.typicode.com';
 Vue.prototype.$axios = axios;
 Vue.config.productionTip = false;
+
 new Vue({
   router,
   render: h => h(App)
